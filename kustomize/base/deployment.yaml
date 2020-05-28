@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: passive-node
+  name: passive-node
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: passive-node
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: passive-node
+    spec:
+      initContainers:
+      - name: configure
+        command: ["bash", "/scripts/initContainer-entrypoint"]
+        image: rcmorano/cardano-node:guild-ops-ptn0-passive
+        imagePullPolicy: "Always"
+        env:
+        - name: CNODE_PORT
+          value: "6000"
+        - name: CNODE_HOST_ADDR
+          value: "0.0.0.0"
+        volumeMounts:
+        - mountPath: /opt/cardano/cnode/files.pvc
+          name: passive-node-files
+        - mountPath: /opt/cardano/cnode/priv
+          name: passive-node-priv
+        - mountPath: /opt/cardano/cnode/db
+          name: passive-node-db
+        - mountPath: /opt/cardano/cnode/logs
+          name: passive-node-logs
+        - mountPath: /scripts
+          name: scripts
+      containers:
+      - env:
+        - name: CNODE_PORT
+          value: "6000"
+        image: rcmorano/cardano-node:guild-ops-ptn0-passive
+        imagePullPolicy: "Always"
+        name: passive-node
+        ports:
+        - containerPort: 6000
+        - containerPort: 13788
+        resources: {}
+        volumeMounts:
+        - mountPath: /opt/cardano/cnode/files
+          name: passive-node-files
+        - mountPath: /opt/cardano/cnode/priv
+          name: passive-node-priv
+        - mountPath: /opt/cardano/cnode/db
+          name: passive-node-db
+        - mountPath: /opt/cardano/cnode/logs
+          name: passive-node-logs
+        - mountPath: /scripts
+          name: scripts
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - name: passive-node-files
+        persistentVolumeClaim:
+          claimName: passive-node-files
+      - name: passive-node-priv
+        persistentVolumeClaim:
+          claimName: passive-node-priv
+      - name: passive-node-db
+        persistentVolumeClaim:
+          claimName: passive-node-db
+      - name: passive-node-logs
+        persistentVolumeClaim:
+          claimName: passive-node-logs
+      - name: scripts
+        configMap:
+          name: passive-node-scripts

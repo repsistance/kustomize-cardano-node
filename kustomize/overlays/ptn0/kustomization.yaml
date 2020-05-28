@@ -1,0 +1,28 @@
+namespace: cardano-ptn0
+#namePrefix: ptn0-
+commonLabels:
+  environment: production
+  cardano_network: ptn0
+  cardano_node_type: haskell
+  project_name: guild-ops
+commonAnnotations:
+  note: this is your local k8s cluster!
+bases:
+- ../../base
+patches:
+- path: patches/service-nodeport.yaml
+  target:
+    kind: Service
+    name: passive-node
+- path: patches/deployment-container-port.yaml
+  target:
+    kind: Deployment
+- path: patches/deployment-container-env.yaml
+  target:
+    kind: Deployment
+- path: patches/deployment-image.yaml
+  target:
+    kind: Deployment
+- path: patches/servicemonitor-ns-selector.yaml
+  target:
+    kind: ServiceMonitor

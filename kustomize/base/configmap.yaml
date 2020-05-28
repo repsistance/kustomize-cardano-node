@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: passive-node-scripts
+  namespace: cardano
+  labels:
+    app: cadano-node
+data:
+  initContainer-entrypoint: |
+    rm -rf /opt/cardano/cnode/db/lost+found
+    for file in configuration.yaml genesis.json topology.json
+    do
+      test ! -e /opt/cardano/cnode/files.pvc/${file} && \
+        cp /opt/cardano/cnode/files/${file} /opt/cardano/cnode/files.pvc/
+    done
+    chown -R nobody: /opt/cardano

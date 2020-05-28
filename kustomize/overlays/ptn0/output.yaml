@@ -1,0 +1,293 @@
+apiVersion: v1
+data:
+  initContainer-entrypoint: |
+    for file in configuration.yaml genesis.json topology.json
+    do
+      test ! -e /opt/cardano/cnode/files.pvc/${file} && \
+        cp /opt/cardano/cnode/files/${file} /opt/cardano/cnode/files.pvc/
+    done
+    chown -R nobody: /opt/cardano
+kind: ConfigMap
+metadata:
+  annotations:
+    note: this is your local k8s cluster!
+  labels:
+    app: cadano-node
+    cardano_network: ptn0
+    cardano_node_type: haskell
+    environment: production
+    project_name: guild-ops
+  name: passive-node-scripts
+  namespace: cardano-ptn0
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    note: this is your local k8s cluster!
+  labels:
+    cardano_network: ptn0
+    cardano_node_type: haskell
+    environment: production
+    io.kompose.service: passive-node
+    project_name: guild-ops
+  name: passive-node
+  namespace: cardano-ptn0
+spec:
+  externalTrafficPolicy: Cluster
+  ports:
+  - name: p2p
+    nodePort: 30201
+    port: 30201
+    protocol: TCP
+    targetPort: 30201
+  selector:
+    cardano_network: ptn0
+    cardano_node_type: haskell
+    environment: production
+    io.kompose.service: passive-node
+    project_name: guild-ops
+  sessionAffinity: None
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    note: this is your local k8s cluster!
+  labels:
+    app.kubernetes.io/name: passive-node-metrics
+    cardano_network: ptn0
+    cardano_node_type: haskell
+    environment: production
+    project_name: guild-ops
+  name: passive-node-metrics
+  namespace: cardano-ptn0
+spec:
+  ports:
+  - name: metrics
+    port: 13788
+    protocol: TCP
+    targetPort: 13788
+  selector:
+    cardano_network: ptn0
+    cardano_node_type: haskell
+    environment: production
+    io.kompose.service: passive-node
+    project_name: guild-ops
+  sessionAffinity: None
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    note: this is your local k8s cluster!
+  labels:
+    cardano_network: ptn0
+    cardano_node_type: haskell
+    environment: production
+    io.kompose.service: passive-node
+    project_name: guild-ops
+  name: passive-node
+  namespace: cardano-ptn0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      cardano_network: ptn0
+      cardano_node_type: haskell
+      environment: production
+      io.kompose.service: passive-node
+      project_name: guild-ops
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        note: this is your local k8s cluster!
+      labels:
+        cardano_network: ptn0
+        cardano_node_type: haskell
+        environment: production
+        io.kompose.service: passive-node
+        project_name: guild-ops
+    spec:
+      containers:
+      - env:
+        - name: CNODE_PORT
+          value: "30201"
+        - name: CNODE_HOST_ADDR
+          value: 0.0.0.0
+        image: rcmorano/cardano-node:guild-ops-ptn0-passive-202005280911-2eeb27d-4f026b6
+        imagePullPolicy: Always
+        name: passive-node
+        ports:
+        - containerPort: 30201
+        - containerPort: 13788
+        resources: {}
+        volumeMounts:
+        - mountPath: /opt/cardano/cnode/files
+          name: passive-node-files
+        - mountPath: /opt/cardano/cnode/priv
+          name: passive-node-priv
+        - mountPath: /opt/cardano/cnode/db
+          name: passive-node-db
+        - mountPath: /opt/cardano/cnode/logs
+          name: passive-node-logs
+        - mountPath: /scripts
+          name: scripts
+      initContainers:
+      - command:
+        - bash
+        - /scripts/initContainer-entrypoint
+        env:
+        - name: CNODE_PORT
+          value: "30201"
+        image: rcmorano/cardano-node:guild-ops-ptn0-passive-202005280911-2eeb27d-4f026b6
+        imagePullPolicy: Always
+        name: configure
+        volumeMounts:
+        - mountPath: /opt/cardano/cnode/files.pvc
+          name: passive-node-files
+        - mountPath: /opt/cardano/cnode/priv
+          name: passive-node-priv
+        - mountPath: /opt/cardano/cnode/db
+          name: passive-node-db
+        - mountPath: /opt/cardano/cnode/logs
+          name: passive-node-logs
+        - mountPath: /scripts
+          name: scripts
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - name: passive-node-files
+        persistentVolumeClaim:
+          claimName: passive-node-files
+      - name: passive-node-priv
+        persistentVolumeClaim:
+          claimName: passive-node-priv
+      - name: passive-node-db
+        persistentVolumeClaim:
+          claimName: passive-node-db
+      - name: passive-node-logs
+        persistentVolumeClaim:
+          claimName: passive-node-logs
+      - configMap:
+          name: passive-node-scripts
+        name: scripts
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  annotations:
+    kompose.cmd: kompose -f docker-compose.yml-guild-ops-ptn0 convert
+    kompose.version: 1.21.0 (992df58d8)
+    note: this is your local k8s cluster!
+  labels:
+    cardano_network: ptn0
+    cardano_node_type: haskell
+    environment: production
+    io.kompose.service: passive-node
+    project_name: guild-ops
+    prometheus: enabled
+  name: passive-node
+  namespace: cardano-ptn0
+spec:
+  endpoints:
+  - interval: 10s
+    path: /metrics
+    port: metrics
+    targetPort: 13788
+  namespaceSelector:
+    matchNames:
+    - cardano-ptn0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: passive-node-metrics
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    note: this is your local k8s cluster!
+  creationTimestamp: null
+  labels:
+    cardano_network: ptn0
+    cardano_node_type: haskell
+    environment: production
+    io.kompose.service: passive-node-db
+    project_name: guild-ops
+  name: passive-node-db
+  namespace: cardano-ptn0
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1000Mi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    note: this is your local k8s cluster!
+  creationTimestamp: null
+  labels:
+    cardano_network: ptn0
+    cardano_node_type: haskell
+    environment: production
+    io.kompose.service: passive-node-files
+    project_name: guild-ops
+  name: passive-node-files
+  namespace: cardano-ptn0
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+  storageClassName: csi-s3
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    note: this is your local k8s cluster!
+  creationTimestamp: null
+  labels:
+    cardano_network: ptn0
+    cardano_node_type: haskell
+    environment: production
+    io.kompose.service: passive-node-logs
+    project_name: guild-ops
+  name: passive-node-logs
+  namespace: cardano-ptn0
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1000Mi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    note: this is your local k8s cluster!
+  creationTimestamp: null
+  labels:
+    cardano_network: ptn0
+    cardano_node_type: haskell
+    environment: production
+    io.kompose.service: passive-node-priv
+    project_name: guild-ops
+  name: passive-node-priv
+  namespace: cardano-ptn0
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+  storageClassName: csi-s3

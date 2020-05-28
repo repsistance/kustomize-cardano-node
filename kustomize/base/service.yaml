@@ -1,0 +1,37 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: passive-node
+  labels:
+    io.kompose.service: passive-node
+spec:
+  externalTrafficPolicy: Cluster
+  sessionAffinity: None
+  type: NodePort
+  ports:
+  - name: p2p
+    port: 6000
+    nodePort: 6000
+    targetPort: 6000
+    protocol: TCP
+  selector:
+    io.kompose.service: passive-node
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: passive-node-metrics
+  labels:
+    app.kubernetes.io/name: passive-node-metrics
+spec:
+  sessionAffinity: None
+  type: ClusterIP
+  ports:
+  - name: metrics
+    port: 13788
+    targetPort: 13788
+    protocol: TCP
+  selector:
+    io.kompose.service: passive-node

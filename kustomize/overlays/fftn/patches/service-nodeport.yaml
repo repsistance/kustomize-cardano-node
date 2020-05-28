@@ -1,0 +1,8 @@
+- op: replace
+  path: /spec/ports
+  value:
+    - name: p2p
+      port: 31001
+      nodePort: 31001
+      targetPort: 31001
+      protocol: TCP

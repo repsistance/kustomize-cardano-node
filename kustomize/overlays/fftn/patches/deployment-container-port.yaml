@@ -1,0 +1,5 @@
+- op: replace
+  path: /spec/template/spec/containers/0/ports
+  value:
+    - containerPort: 31001
+    - containerPort: 13788
