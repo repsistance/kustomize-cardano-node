@@ -210,18 +210,20 @@ data:
   initContainer-entrypoint: |
     rm -rf /opt/cardano/cnode/db/lost+found
 
+    FILES="configuration.yaml genesis.json topology.json"
+
+    for file in ${FILES}
+    do
+      test ! -e /opt/cardano/cnode/files.pvc/${file} && \
+        cp /opt/cardano/cnode/files/${file} /opt/cardano/cnode/files.pvc/
+    done
+
     if [ "${CNODE_USE_CONFIGMAP}" == "true" ]
     then
-      for file in configuration.yaml genesis.json topology.json
+      for file in ${FILES}
       do
         test -e /configmap/${file} && \
           cp /configmap/${file} /opt/cardano/cnode/files.pvc/
-      done
-    else
-      for file in configuration.yaml genesis.json topology.json
-      do
-        test ! -e /opt/cardano/cnode/files.pvc/${file} && \
-          cp /opt/cardano/cnode/files/${file} /opt/cardano/cnode/files.pvc/
       done
     fi
 
