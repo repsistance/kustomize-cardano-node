@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    io.kompose.service: passive-node
+  name: passive-node
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      io.kompose.service: passive-node
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: passive-node
+    spec:
+      initContainers:
+      - name: configure
+        command: ["bash", "/configmap/initContainer-entrypoint"]
+        image: rcmorano/cardano-node:guild-ops-ptn0-passive
+        imagePullPolicy: "Always"
+        env:
+        - name: CNODE_PORT
+          value: "6000"
+        - name: CNODE_HOST_ADDR
+          value: "0.0.0.0"
+        - name: CNODE_USE_CONFIGMAP
+          value: "true"
+        volumeMounts:
+        - mountPath: /opt/cardano/cnode/files.pvc
+          name: passive-node-files
+        - mountPath: /opt/cardano/cnode/priv
+          name: passive-node-priv
+        - mountPath: /opt/cardano/cnode/db
+          name: passive-node-db
+        - mountPath: /configmap
+          name: configmap
+      containers:
+      - env:
+        - name: CNODE_PORT
+          value: "6000"
+        image: rcmorano/cardano-node:guild-ops-ptn0-passive
+        imagePullPolicy: "Always"
+        name: passive-node
+        ports:
+        - containerPort: 6000
+        - containerPort: 13788
+        resources: {}
+        volumeMounts:
+        - mountPath: /opt/cardano/cnode/files
+          name: passive-node-files
+        - mountPath: /opt/cardano/cnode/priv
+          name: passive-node-priv
+        - mountPath: /opt/cardano/cnode/db
+          name: passive-node-db
+        - mountPath: /configmap
+          name: configmap
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - name: configmap
+        configMap:
+          name: passive-node-configmap
+  volumeClaimTemplates:
+  - metadata:
+      name: passive-node-files
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: csi-s3
+      resources:
+        requests:
+          storage: 100Mi
+  - metadata:
+      name: passive-node-priv
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: csi-s3
+      resources:
+        requests:
+          storage: 100Mi
+  - metadata:
+      name: passive-node-db
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+

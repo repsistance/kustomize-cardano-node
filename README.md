@@ -7,11 +7,19 @@ kapp deploy -c -a cardano-${NETWORK} -n cardano-${NETWORK} -f overlays/${NETWORK
 * kapp redeploy
 ```
 NETWORK=fftn
+NODES=2
+TYPE=passive
 # flush genesis, topology and db
-kubectl iexec -n cardano-${NETWORK} passive-node -- bash -c 'rm /opt/cardano/cnode/files/genesis.json; rm /opt/cardano/cnode/files/topology.json; rm -rf /opt/cardano/cnode/db/*'
-kubectl delete deploy -n cardano-${NETWORK} --all
-kubectl delete pvc -n cardano-${NETWORK} passive-node-db;
-kapp deploy -c -a cardano-${NETWORK} -n cardano-${NETWORK} -f overlays/${NETWORK}/output.yaml
+for nodenum in $(seq 0 $(( NODES - 1 )))
+do
+  kubectl iexec -n cardano-${NETWORK} ${TYPE}-node-${nodenum} -- bash -c 'rm /opt/cardano/cnode/files/genesis.json; rm /opt/cardano/cnode/files/topology.json'
+done
+kubectl scale statefulset -n cardano-${NETWORK} --replicas=0 passive-node
+for nodenum in $(seq 0 $(( NODES - 1 )))
+do
+  kubectl delete pvc -n cardano-${NETWORK} ${TYPE}-node-db-${TYPE}-node-${nodenum}
+done
+kapp deploy -c -a cardano-${NETWORK} -n cardano-${NETWORK} -f overlays/${NETWORK}/output.yaml --filter-kind StatefulSet
 ```
 * Enter container (in e.g. to modify and test config)
 ```

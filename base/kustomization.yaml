@@ -1,10 +1,11 @@
 namespace: cardano
 resources:
-- files-persistentvolumeclaim.yaml
-- logs-persistentvolumeclaim.yaml
-- priv-persistentvolumeclaim.yaml
-- db-persistentvolumeclaim.yaml
+#- files-persistentvolumeclaim.yaml
+#- logs-persistentvolumeclaim.yaml
+#- priv-persistentvolumeclaim.yaml
+#- db-persistentvolumeclaim.yaml
 - configmap.yaml
-- deployment-passive-node.yaml
+#- deployment-passive-node.yaml
+- statefulset-passive-node.yaml
 - service.yaml
 - servicemonitor.yaml

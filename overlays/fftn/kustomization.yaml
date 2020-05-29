@@ -16,13 +16,13 @@ patches:
     name: passive-node
 - path: patches/deployment-container-port.yaml
   target:
-    kind: Deployment
+    kind: StatefulSet
 - path: patches/deployment-container-env.yaml
   target:
-    kind: Deployment
+    kind: StatefulSet
 - path: patches/deployment-image.yaml
   target:
-    kind: Deployment
+    kind: StatefulSet
 - path: patches/servicemonitor-ns-selector.yaml
   target:
     kind: ServiceMonitor

@@ -300,7 +300,7 @@ spec:
   type: ClusterIP
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   annotations:
     note: this is your local k8s cluster!
@@ -313,7 +313,7 @@ metadata:
   name: passive-node
   namespace: cardano-ptn0
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       cardano_network: ptn0
@@ -356,8 +356,6 @@ spec:
           name: passive-node-priv
         - mountPath: /opt/cardano/cnode/db
           name: passive-node-db
-        - mountPath: /opt/cardano/cnode/logs
-          name: passive-node-logs
         - mountPath: /configmap
           name: configmap
       initContainers:
@@ -381,28 +379,56 @@ spec:
           name: passive-node-priv
         - mountPath: /opt/cardano/cnode/db
           name: passive-node-db
-        - mountPath: /opt/cardano/cnode/logs
-          name: passive-node-logs
         - mountPath: /configmap
           name: configmap
       restartPolicy: Always
       serviceAccountName: ""
       volumes:
-      - name: passive-node-files
-        persistentVolumeClaim:
-          claimName: passive-node-files
-      - name: passive-node-priv
-        persistentVolumeClaim:
-          claimName: passive-node-priv
-      - name: passive-node-db
-        persistentVolumeClaim:
-          claimName: passive-node-db
-      - name: passive-node-logs
-        persistentVolumeClaim:
-          claimName: passive-node-logs
       - configMap:
           name: passive-node-configmap
         name: configmap
+  volumeClaimTemplates:
+  - metadata:
+      labels:
+        cardano_network: ptn0
+        cardano_node_type: haskell
+        environment: production
+        project_name: guild-ops
+      name: passive-node-files
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 100Mi
+      storageClassName: csi-s3
+  - metadata:
+      labels:
+        cardano_network: ptn0
+        cardano_node_type: haskell
+        environment: production
+        project_name: guild-ops
+      name: passive-node-priv
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 100Mi
+      storageClassName: csi-s3
+  - metadata:
+      labels:
+        cardano_network: ptn0
+        cardano_node_type: haskell
+        environment: production
+        project_name: guild-ops
+      name: passive-node-db
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -432,89 +458,3 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: passive-node-metrics
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  annotations:
-    note: this is your local k8s cluster!
-  creationTimestamp: null
-  labels:
-    cardano_network: ptn0
-    cardano_node_type: haskell
-    environment: production
-    io.kompose.service: passive-node-db
-    project_name: guild-ops
-  name: passive-node-db
-  namespace: cardano-ptn0
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1000Mi
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  annotations:
-    note: this is your local k8s cluster!
-  creationTimestamp: null
-  labels:
-    cardano_network: ptn0
-    cardano_node_type: haskell
-    environment: production
-    io.kompose.service: passive-node-files
-    project_name: guild-ops
-  name: passive-node-files
-  namespace: cardano-ptn0
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 100Mi
-  storageClassName: csi-s3
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  annotations:
-    note: this is your local k8s cluster!
-  creationTimestamp: null
-  labels:
-    cardano_network: ptn0
-    cardano_node_type: haskell
-    environment: production
-    io.kompose.service: passive-node-logs
-    project_name: guild-ops
-  name: passive-node-logs
-  namespace: cardano-ptn0
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1000Mi
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  annotations:
-    note: this is your local k8s cluster!
-  creationTimestamp: null
-  labels:
-    cardano_network: ptn0
-    cardano_node_type: haskell
-    environment: production
-    io.kompose.service: passive-node-priv
-    project_name: guild-ops
-  name: passive-node-priv
-  namespace: cardano-ptn0
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 100Mi
-  storageClassName: csi-s3
