@@ -2,11 +2,17 @@
   path: /spec/template/spec/containers/0/env
   value:
     - name: CNODE_PORT
-      value: "31001"
+      value: "30201"
     - name: CNODE_HOST_ADDR
       value: "0.0.0.0"
+    - name: CNODE_USE_CONFIGMAP
+      value: "true"
 - op: replace
   path: /spec/template/spec/initContainers/0/env
   value:
     - name: CNODE_PORT
-      value: "31001"
+      value: "30201"
+    - name: CNODE_HOST_ADDR
+      value: "0.0.0.0"
+    - name: CNODE_USE_CONFIGMAP
+      value: "true"

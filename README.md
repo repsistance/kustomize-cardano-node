@@ -1,15 +1,17 @@
 * kapp deploy
 ```
 NETWORK=ptn0
-kustomize build kustomize/overlays/${NETWORK} > kustomize/overlays/${NETWORK}/output.yaml
-kapp deploy -y -c -a cardano-${NETWORK} -n cardano-${NETWORK} -f kustomize/overlays/${NETWORK}/output.yaml
+kustomize build overlays/${NETWORK} > overlays/${NETWORK}/output.yaml
+kapp deploy -c -a cardano-${NETWORK} -n cardano-${NETWORK} -f overlays/${NETWORK}/output.yaml
 ```
 * kapp redeploy
 ```
 NETWORK=fftn
-kubectl iexec -n cardano-${NETWORK} passive-node -- bash -c 'rm /opt/cardano/cnode/files/genesis.json; rm /opt/cardano/cnode/files/topology.json'
+# flush genesis, topology and db
+kubectl iexec -n cardano-${NETWORK} passive-node -- bash -c 'rm /opt/cardano/cnode/files/genesis.json; rm /opt/cardano/cnode/files/topology.json; rm -rf /opt/cardano/cnode/db/*'
 kubectl delete deploy -n cardano-${NETWORK} --all
 kubectl delete pvc -n cardano-${NETWORK} passive-node-db;
+kapp deploy -c -a cardano-${NETWORK} -n cardano-${NETWORK} -f overlays/${NETWORK}/output.yaml
 ```
 * Enter container (in e.g. to modify and test config)
 ```
@@ -29,4 +31,3 @@ kubectl delete pod -n cardano-fftn passive-node-6b766564f6-6kc92
 logcli query --no-labels -o raw -qt '{namespace=cardano-ptn0}' | sed 's|.*stdout F ||'
 kubectl tail -n cardano-ptn0 -l cardano_node_type=passive
 ```
-
