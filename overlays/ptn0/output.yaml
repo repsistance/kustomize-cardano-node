@@ -209,7 +209,10 @@ data:
     TraceTxSubmissionProtocol: True
   initContainer-entrypoint: |
     rm -rf /opt/cardano/cnode/db/lost+found
-    for file in configuration.yaml genesis.json topology.json
+
+    FILES="configuration.yaml genesis.json topology.json"
+
+    for file in ${FILES}
     do
       test ! -e /opt/cardano/cnode/files.pvc/${file} && \
         cp /opt/cardano/cnode/files/${file} /opt/cardano/cnode/files.pvc/
@@ -217,15 +220,10 @@ data:
 
     if [ "${CNODE_USE_CONFIGMAP}" == "true" ]
     then
-      for file in configuration.yaml genesis.json topology.json
+      for file in ${FILES}
       do
-        cp /configmap/${file} /opt/cardano/cnode/files.pvc/
-      done
-    else
-      for file in configuration.yaml genesis.json topology.json
-      do
-        test ! -e /opt/cardano/cnode/files.pvc/${file} && \
-          cp /opt/cardano/cnode/files/${file} /opt/cardano/cnode/files.pvc/
+        test -e /configmap/${file} && \
+          cp /configmap/${file} /opt/cardano/cnode/files.pvc/
       done
     fi
 
@@ -342,7 +340,9 @@ spec:
           value: "30201"
         - name: CNODE_HOST_ADDR
           value: 0.0.0.0
-        image: rcmorano/cardano-node:guild-ops-ptn0-passive-202005280911-2eeb27d-4f026b6
+        - name: CNODE_USE_CONFIGMAP
+          value: "true"
+        image: rcmorano/cardano-node:guild-ops-ptn0-passive-202005290039-2eeb27d-4b71fc8
         imagePullPolicy: Always
         name: passive-node
         ports:
@@ -367,7 +367,11 @@ spec:
         env:
         - name: CNODE_PORT
           value: "30201"
-        image: rcmorano/cardano-node:guild-ops-ptn0-passive-202005280911-2eeb27d-4f026b6
+        - name: CNODE_HOST_ADDR
+          value: 0.0.0.0
+        - name: CNODE_USE_CONFIGMAP
+          value: "true"
+        image: rcmorano/cardano-node:guild-ops-ptn0-passive-202005290039-2eeb27d-4b71fc8
         imagePullPolicy: Always
         name: configure
         volumeMounts:
