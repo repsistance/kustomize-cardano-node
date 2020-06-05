@@ -1,9 +1,0 @@
-- op: replace
-  path: /spec/template/spec/containers/0/image
-  value:
-    rcmorano/cardano-node:guild-ops-ptn0-passive-202005290039-2eeb27d-4b71fc8
-
-- op: replace
-  path: /spec/template/spec/initContainers/0/image
-  value:
-    rcmorano/cardano-node:guild-ops-ptn0-passive-202005290039-2eeb27d-4b71fc8

@@ -1,13 +1,10 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  annotations:
-    kompose.cmd: kompose -f docker-compose.yml-guild-ops-ptn0 convert
-    kompose.version: 1.21.0 (992df58d8)
   labels:
-    io.kompose.service: passive-node
+    io.kompose.service: leader-node
     prometheus: enabled
-  name: passive-node
+  name: leader-node
 spec:
   endpoints:
   - port: metrics
@@ -19,4 +16,4 @@ spec:
     - cardano
   selector:
     matchLabels:
-      app.kubernetes.io/name: passive-node-metrics
+      app.kubernetes.io/name: leader-node-metrics

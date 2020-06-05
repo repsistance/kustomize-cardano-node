@@ -5,7 +5,6 @@ resources:
 #- priv-persistentvolumeclaim.yaml
 #- db-persistentvolumeclaim.yaml
 - configmap.yaml
-#- deployment-passive-node.yaml
-- statefulset-passive-node.yaml
+- statefulset.yaml
 - service.yaml
 - servicemonitor.yaml

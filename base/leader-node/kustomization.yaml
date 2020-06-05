@@ -1,0 +1,6 @@
+namespace: cardano
+resources:
+- configmap.yaml
+- statefulset.yaml
+- service.yaml
+- servicemonitor.yaml

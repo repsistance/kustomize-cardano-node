@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: passive-node-configmap
+  name: passive-node
   namespace: cardano
   labels:
     app: cadano-node
@@ -25,6 +25,26 @@ data:
           cp /configmap/${file} /opt/cardano/cnode/files.pvc/
       done
     fi
+
+    NAMESPACE=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
+    KUBE_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+
+    cp -a /opt/cardano/cnode/files.pvc/topology.json /tmp/topology.json.tmp
+
+    curl -sSk -H "Authorization: Bearer $KUBE_TOKEN" https://kubernetes.default.svc/api/v1/namespaces/${NAMESPACE}/pods  | jq -r '.items[].status | select(.phase="Running") | select(.containerStatuses[].name=="leader-node") | .podIP' | \
+      while read ip
+      do
+        jq -r \
+          --arg addr ${ip} \
+          --arg port ${CNODE_PORT} \
+          --arg valency 1 \
+          '.Producers += [{"addr":$addr,"port":($port|tonumber),"valency":($valency|tonumber)}]' \
+          /tmp/topology.json.tmp > /tmp/topology.json
+          mv /tmp/topology.json /tmp/topology.json.tmp
+      done
+
+    cp /tmp/topology.json.tmp /opt/cardano/cnode/files.pvc/topology.json.${CNODE_ROLE}
+
 
     chown -R nobody: /opt/cardano
 

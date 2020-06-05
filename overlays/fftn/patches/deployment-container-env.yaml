@@ -5,6 +5,8 @@
       value: "31001"
     - name: CNODE_HOST_ADDR
       value: "0.0.0.0"
+    - name: CNODE_USE_CONFIGMAP
+      value: "true"
 - op: replace
   path: /spec/template/spec/initContainers/0/env
   value:
