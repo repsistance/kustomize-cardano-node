@@ -7,8 +7,6 @@ metadata:
     app: clio1-topology-updater
 data:
   topology-updater: |
-    set -x
-
     source /etc/profile.d/docker-environment.sh
 
     NAMESPACE=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
