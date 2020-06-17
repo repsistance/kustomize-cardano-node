@@ -1,3 +1,4 @@
 namespace: cardano
 resources:
 - rbac.yaml
+- configmap-topologyUpdater.yaml

@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: clio1-topology-updater
+  labels:
+    k8s-app: clio1-topology-updater
+spec:
+  selector:
+    matchLabels:
+      name: clio1-topology-updater
+  template:
+    metadata:
+      labels:
+        name: clio1-topology-updater
+    spec:
+#      initContainers:
+#        - name: poc
+#          image: unfor19/serverless-template
+#          resources:
+#            limits:
+#              cpu: 100m
+#              memory: 100Mi
+#            requests:
+#              cpu: 100m
+#              memory: 100Mi
+      containers:
+      - env:
+        - name: CRON_STRING
+          value: "*/60 * * * nobody bash /configmap/topology-updater"
+        - name: BASE_URL
+          value: "https://api.clio.one/htopology/v1"
+        - name: CNODE_PORT
+          value: "31001"
+        - name: CNODE_HOSTNAME
+          value: "relay.fftn.cardano.none.guru"
+        - name: CNODE_VALENCY
+          value: "2"
+        - name: TESTNET_MAGIC
+          value: "42"
+        name: crond
+        image: rcmorano/ubuntu-crond:latest
+        imagePullPolicy: "Always"
+        resources:
+          limits:
+            cpu: 50m
+            memory: 50Mi
+          requests:
+            cpu: 50m
+            memory: 50Mi
+        volumeMounts:
+        - mountPath: /etc/profile.d
+          name: docker-environment
+        - mountPath: /configmap
+          name: clio1-topology-updater
+      volumes:
+      - name: docker-environment
+        emptyDir:
+          medium: Memory
+      - name: clio1-topology-updater
+        configMap:
+          name: clio1-topology-updater

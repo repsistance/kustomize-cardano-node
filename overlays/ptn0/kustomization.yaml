@@ -30,10 +30,14 @@ patches:
   target:
     kind: ConfigMap
     name: passive-node
-- path: patches/service-nodeport.yaml
+- path: patches/service-passive-node-nodeport.yaml
   target:
     kind: Service
     name: passive-node
+- path: patches/service-passive-node-headless.yaml
+  target:
+    kind: Service
+    name: passive-node-headless
 - path: patches/deployment-image-passive-node.yaml
   target:
     kind: StatefulSet
@@ -42,4 +46,8 @@ patches:
 - path: patches/deployment-image-leader-node.yaml
   target:
     kind: StatefulSet
+    name: leader-node
+- path: patches/service-leader-node.yaml
+  target:
+    kind: Service
     name: leader-node

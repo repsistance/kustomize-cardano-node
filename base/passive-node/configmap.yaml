@@ -31,17 +31,15 @@ data:
 
     cp -a /opt/cardano/cnode/files.pvc/topology.json /tmp/topology.json.tmp
 
-    curl -sSk -H "Authorization: Bearer $KUBE_TOKEN" https://kubernetes.default.svc/api/v1/namespaces/${NAMESPACE}/pods  | jq -r '.items[].status | select(.phase="Running") | select(.containerStatuses[].name=="leader-node") | .podIP' | \
-      while read ip
-      do
-        jq -r \
-          --arg addr ${ip} \
-          --arg port ${CNODE_PORT} \
-          --arg valency 1 \
-          '.Producers += [{"addr":$addr,"port":($port|tonumber),"valency":($valency|tonumber)}]' \
-          /tmp/topology.json.tmp > /tmp/topology.json
-          mv /tmp/topology.json /tmp/topology.json.tmp
-      done
+    VALENCY=$(dig +short leader-node.${NAMESPACE}.svc.cluster.local | wc -l)
+
+    jq -r \
+      --arg addr leader-node.${NAMESPACE}.svc.cluster.local \
+      --arg port ${CNODE_PORT} \
+      --arg valency ${VALENCY} \
+      '.Producers += [{"addr":$addr,"port":($port|tonumber),"valency":($valency|tonumber)}]' \
+      /tmp/topology.json.tmp > /tmp/topology.json
+    mv /tmp/topology.json /tmp/topology.json.tmp
 
     cp /tmp/topology.json.tmp /opt/cardano/cnode/files.pvc/topology.json.${CNODE_ROLE}
 

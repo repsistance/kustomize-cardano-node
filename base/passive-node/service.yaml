@@ -7,12 +7,31 @@ metadata:
     io.kompose.service: passive-node
 spec:
   externalTrafficPolicy: Local
-  sessionAffinity: None
+  sessionAffinity: ClientIP
   type: NodePort
   ports:
   - name: p2p
     port: 6000
     nodePort: 6000
+    targetPort: 6000
+    protocol: TCP
+  selector:
+    io.kompose.service: passive-node
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: passive-node-headless
+  labels:
+    io.kompose.service: passive-node
+spec:
+  sessionAffinity: ClientIP
+  clusterIP: None
+  type: ClusterIP
+  ports:
+  - name: p2p
+    port: 6000
     targetPort: 6000
     protocol: TCP
   selector:
