@@ -15,9 +15,6 @@ resources:
 - resources/daemonset-topologyUpdater.yaml
 patches:
 # common
-- path: patches/configmap-genesis.yaml
-  target:
-    kind: ConfigMap
 - path: patches/deployment-container-port.yaml
   target:
     kind: StatefulSet
@@ -28,6 +25,10 @@ patches:
   target:
     kind: ServiceMonitor
 # passive-node
+- path: patches/configmap-genesis.yaml
+  target:
+    kind: ConfigMap
+    name: passive-node
 - path: patches/configmap-passive-node-topology.yaml
   target:
     kind: ConfigMap
@@ -44,8 +45,20 @@ patches:
   target:
     kind: StatefulSet
     name: passive-node
+- path: patches/deployment-passive-node-replicas.yaml
+  target:
+    kind: StatefulSet
+    name: passive-node
 # leader-node
+- path: patches/configmap-genesis.yaml
+  target:
+    kind: ConfigMap
+    name: leader-node
 - path: patches/deployment-image-leader-node.yaml
+  target:
+    kind: StatefulSet
+    name: leader-node
+- path: patches/deployment-leader-node-replicas.yaml
   target:
     kind: StatefulSet
     name: leader-node
