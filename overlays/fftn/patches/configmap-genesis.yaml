@@ -17,6 +17,7 @@
         "maxBlockBodySize": 65536,
         "keyMinRefund": 0,
         "minFeeB": 155381,
+        "minPoolCost": 5000000,
         "eMax": 100,
         "extraEntropy": {
           "tag": "NeutralNonce"
