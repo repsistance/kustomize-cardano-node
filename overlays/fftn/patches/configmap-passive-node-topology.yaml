@@ -6,7 +6,26 @@
         {
           "addr": "relays-new.ff.dev.cardano.org",
           "port": 3001,
-          "valency": 8
+          "valency": 4
+        },
+        {
+          "addr": "song1.smitstakepools.online",
+          "port": 3001,
+          "valency": 1
+        },
+        {
+          "addr": "relay.anqahub.com",
+          "port": 3032,
+          "valency": 1
+        },
+        {
+          "addr": "relayone.dezent.online",
+          "port": 8885,
+          "valency": 1
+        },
+        { "addr": "4ada.staking4ada.org",
+          "port": 8081,
+          "valency": 1
         }
       ]
     }
