@@ -31,6 +31,21 @@ data:
 
     cp -a /opt/cardano/cnode/files.pvc/topology.json /tmp/topology.json.tmp
 
+    curl -sSk -H "Authorization: Bearer $KUBE_TOKEN" https://kubernetes.default.svc/api/v1/namespaces/${NAMESPACE}/pods  | jq -r .items[].metadata.name | grep ^passive-node | \
+      while read node
+      do
+        if [[ "${MY_POD_NAME}" != "${node}" ]] && [[ "${node}" != "null" ]]
+        then
+          jq -r \
+            --arg addr ${node} \
+            --arg port ${CNODE_PORT} \
+            --arg valency 1 \
+            '.Producers += [{"addr":$addr,"port":($port|tonumber),"valency":($valency|tonumber)}]' \
+            /tmp/topology.json.tmp > /tmp/topology.json
+            mv /tmp/topology.json /tmp/topology.json.tmp
+        fi
+      done
+
     VALENCY=$(dig +short leader-node.${NAMESPACE}.svc.cluster.local | wc -l)
 
     jq -r \
