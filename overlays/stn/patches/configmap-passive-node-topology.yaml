@@ -1,0 +1,12 @@
+- op: add
+  path: /data/topology.json
+  value: |
+    {
+      "Producers": [
+        {
+          "addr": "relays-new.shelley-testnet.dev.cardano.org",
+          "port": 3001,
+          "valency": 8
+        }
+      ]
+    }
