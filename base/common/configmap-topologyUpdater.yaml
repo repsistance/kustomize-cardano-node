@@ -9,8 +9,15 @@ data:
   topology-updater: |
     source /etc/profile.d/docker-environment.sh
 
+    set -x
+
     NAMESPACE=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
     
     blockNo=$(curl -s passive-node-metrics.${NAMESPACE}.svc.cluster.local:13788/metrics | grep cardano_node_ChainDB_metrics_blockNum_int | awk '{print $NF}')
+
+    if [ ! -z "${CNODE_HOSTNAME}" ]
+    then
+      HOSTNAME_ARG="&hostname=${CNODE_HOSTNAME}"
+    fi
     
-    curl -s "${BASE_URL}/?port=${CNODE_PORT}&blockNo=${blockNo}&hostname=${CNODE_HOSTNAME}&valency=${CNODE_VALENCY}&magic=${TESTNET_MAGIC}"
+    curl -s "${BASE_URL}/?port=${CNODE_PORT}&blockNo=${blockNo}${HOSTNAME_ARG}&valency=${CNODE_VALENCY}&magic=${TESTNET_MAGIC}"
