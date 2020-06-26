@@ -36,8 +36,9 @@ data:
       do
         if [[ "${MY_POD_NAME}" != "${node}" ]] && [[ "${node}" != "null" ]]
         then
+          PEER_ADDR="${node}.passive-node.${NAMESPACE}.svc.cluster.local"
           jq -r \
-            --arg addr ${node} \
+            --arg addr ${PEER_ADDR} \
             --arg port ${CNODE_PORT} \
             --arg valency 1 \
             '.Producers += [{"addr":$addr,"port":($port|tonumber),"valency":($valency|tonumber)}]' \
