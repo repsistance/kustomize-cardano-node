@@ -24,7 +24,9 @@ spec:
 #              cpu: 100m
 #              memory: 100Mi
       containers:
-      - env:
+      - name: crond
+        command: ["bash", "-c", "while true; do bash /configmap/topology-updater; sleep 3600; done"]
+        env:
         - name: CRON_STRING
           value: "*/60 * * * nobody bash /configmap/topology-updater"
         - name: BASE_URL
@@ -37,7 +39,6 @@ spec:
           value: "2"
         - name: TESTNET_MAGIC
           value: "42"
-        name: crond
         image: rcmorano/ubuntu-crond:latest
         imagePullPolicy: "Always"
         resources:
