@@ -11,8 +11,8 @@ bases:
 - ../../base/common
 - ../../base/passive-node
 - ../../base/leader-node
-resources:
-- resources/daemonset-topologyUpdater.yaml
+#resources:
+#- resources/daemonset-topologyUpdater.yaml
 patches:
 # common
 - path: patches/deployment-container-port.yaml
