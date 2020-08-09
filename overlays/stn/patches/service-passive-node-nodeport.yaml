@@ -2,7 +2,7 @@
   path: /spec/ports
   value:
     - name: p2p
-      port: 31101
-      nodePort: 31101
-      targetPort: 31101
+      port: 31103
+      nodePort: 31103
+      targetPort: 31103
       protocol: TCP

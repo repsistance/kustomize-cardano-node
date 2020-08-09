@@ -1,9 +1,10 @@
+    #repsistance/cardano-node:iohk-stn-passive-202006241904-00f847b-88ed4d1
 - op: replace
   path: /spec/template/spec/containers/0/image
   value:
-    repsistance/cardano-node:iohk-stn-passive
+    repsistance/cardano-node:iohk-stn-passive-1.15.1
 
 - op: replace
   path: /spec/template/spec/initContainers/0/image
   value:
-    repsistance/cardano-node:iohk-stn-passive
+    repsistance/cardano-node:iohk-stn-passive-1.15.1

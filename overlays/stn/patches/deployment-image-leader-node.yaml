@@ -1,9 +1,10 @@
+#    repsistance/cardano-node:iohk-stn-leader-202006241905-00f847b-88ed4d1
 - op: replace
   path: /spec/template/spec/containers/0/image
   value:
-    repsistance/cardano-node:iohk-stn-leader
+    repsistance/cardano-node:iohk-stn-leader-1.15.1
 
 - op: replace
   path: /spec/template/spec/initContainers/0/image
   value:
-    repsistance/cardano-node:iohk-stn-leader
+    repsistance/cardano-node:iohk-stn-leader-1.15.1

@@ -6,19 +6,24 @@ kapp deploy -c -a cardano-${NETWORK} -n cardano-${NETWORK} -f overlays/${NETWORK
 ```
 * kapp redeploy
 ```
-kustomize build overlays/${NETWORK} > overlays/${NETWORK}/output.yaml
 NETWORK=ptn0
-NODES=2
-TYPE=leader
-kubectl delete statefulset -n cardano-${NETWORK} ${TYPE}-node
-kubectl delete secret -n cardano-ptn0 pool-keys
-kubectl delete pvc -n cardano-${NETWORK} ${TYPE}-node-db-${TYPE}-node-0
+kustomize build overlays/${NETWORK} > overlays/${NETWORK}/output.yaml
+LEADER_NODES=2
+PASSIVE_NODES=2
 TYPE=passive
-kubectl delete statefulset -n cardano-${NETWORK} ${TYPE}-node
-for nodenum in $(seq 0 $(( NODES - 1 )))
+kubectl scale statefulset -n cardano-${NETWORK} --replicas=0 ${TYPE}-node
+for nodenum in $(seq 0 $(( PASSIVE_NODES - 1 )))
 do
   kubectl delete pvc -n cardano-${NETWORK} ${TYPE}-node-db-${TYPE}-node-${nodenum}
 done
+kubectl scale statefulset -n cardano-${NETWORK} --replicas=${PASSIVE_NODES} ${TYPE}-node
+TYPE=leader
+kubectl scale statefulset -n cardano-${NETWORK} --replicas=0 ${TYPE}-node
+for nodenum in $(seq 0 $(( LEADER_NODES - 1 )))
+do
+  kubectl delete pvc -n cardano-${NETWORK} ${TYPE}-node-db-${TYPE}-node-${nodenum}
+done
+kubectl scale statefulset -n cardano-${NETWORK} --replicas=${LEADER_NODES} ${TYPE}-node
 kapp deploy -yc -a cardano-${NETWORK} -n cardano-${NETWORK} -f overlays/${NETWORK}/output.yaml --filter-kind ConfigMap
 kapp deploy -yc -a cardano-${NETWORK} -n cardano-${NETWORK} -f overlays/${NETWORK}/output.yaml --filter-kind StatefulSet --filter-name passive-node
 # register pool

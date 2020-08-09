@@ -13,16 +13,11 @@ spec:
       labels:
         name: clio1-topology-updater
     spec:
-#      initContainers:
-#        - name: poc
-#          image: unfor19/serverless-template
-#          resources:
-#            limits:
-#              cpu: 100m
-#              memory: 100Mi
-#            requests:
-#              cpu: 100m
-#              memory: 100Mi
+      tolerations:
+        - key: "dedicated"
+          operator: "Equal"
+          value: "mainnet"
+          effect: "PreferNoSchedule"
       containers:
       - name: crond
         command: ["bash", "-c", "while true; do bash /configmap/topology-updater; sleep 3600; done"]
@@ -32,13 +27,13 @@ spec:
         - name: BASE_URL
           value: "https://api.clio.one/htopology/v1"
         - name: CNODE_PORT
-          value: "31103"
+          value: "30042"
         - name: CNODE_HOSTNAME
-          value: "relay.stn.cardano.none.guru"
+          value: "relay.mainnet.cardano.none.guru"
         - name: CNODE_VALENCY
           value: "2"
         - name: TESTNET_MAGIC
-          value: "42"
+          value: "764824073"
         image: rcmorano/ubuntu-crond:latest
         imagePullPolicy: "Always"
         resources:

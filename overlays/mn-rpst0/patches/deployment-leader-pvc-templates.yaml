@@ -1,0 +1,26 @@
+- op: replace
+  path: /spec/volumeClaimTemplates
+  value:
+  - metadata:
+      name: leader-node-files
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: csi-s3
+      resources:
+        requests:
+          storage: 100Mi
+  - metadata:
+      name: leader-node-priv
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: csi-s3
+      resources:
+        requests:
+          storage: 100Mi
+  - metadata:
+      name: leader-node-db
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 42Gi

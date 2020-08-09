@@ -1,9 +1,9 @@
 - op: replace
   path: /spec/template/spec/containers/0/image
   value:
-    repsistance/cardano-node:guild-ops-ptn0-passive-1.15.0
+    repsistance/cardano-node:iohk-mn-leader-1.18.0
 
 - op: replace
   path: /spec/template/spec/initContainers/0/image
   value:
-    repsistance/cardano-node:guild-ops-ptn0-passive-1.15.0
+    repsistance/cardano-node:iohk-mn-leader-1.18.0

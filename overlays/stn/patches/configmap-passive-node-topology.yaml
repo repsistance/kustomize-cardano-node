@@ -6,7 +6,57 @@
         {
           "addr": "relays-new.shelley-testnet.dev.cardano.org",
           "port": 3001,
-          "valency": 8
+          "valency": 3
+        },
+        {
+          "addr": "137.186.219.2",
+          "port": 3002,
+          "valency": 1
+        },
+        {
+          "addr": "156.249.8.207",
+          "port": 8081,
+          "valency": 1
+        },
+        {
+          "addr": "178.128.161.106",
+          "port": 3002,
+          "valency": 1
+        },
+        {
+          "addr": "35.214.232.231",
+          "port": 3001,
+          "valency": 1
+        },
+        {
+          "addr": "relay01.stakepoolcentral.com",
+          "port": 17654,
+          "valency": 1
+        },
+        {
+          "addr": "relay1.angelstakepool.net",
+          "port": 3001,
+          "valency": 1
+        },
+        {
+          "addr": "relays.stakings.club",
+          "port": 15001,
+          "valency": 1
+        },
+        {
+          "addr": "165.22.226.57",
+          "port": 3001,
+          "valency": 1
+        },
+        {
+          "addr": "relay1.virtualfreedom.net",
+          "port": 3002,
+          "valency": 1
+        },
+        {
+          "addr": "211.14.169.79",
+          "port": 3001,
+          "valency": 1
         }
       ]
     }

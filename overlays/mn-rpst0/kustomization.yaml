@@ -1,20 +1,23 @@
-namespace: cardano-stn
+namespace: cardano-mn-rpst0
 #namePrefix: ptn0-
 commonLabels:
   environment: production
-  cardano_network: stn
+  cardano_network: mainnet
   cardano_node_type: haskell
-  project_name: iohk-stn
+  project_name: iohk-mn
 commonAnnotations:
   note: this is your local k8s cluster!
 bases:
 - ../../base/common
 - ../../base/passive-node
 - ../../base/leader-node
-#resources:
-#- resources/daemonset-topologyUpdater.yaml
+resources:
+- resources/daemonset-topologyUpdater.yaml
 patches:
 # common
+- path: patches/deployment-affinity.yaml
+  target:
+    kind: StatefulSet
 - path: patches/deployment-container-port.yaml
   target:
     kind: StatefulSet
@@ -25,11 +28,11 @@ patches:
   target:
     kind: ServiceMonitor
 # passive-node
-- path: patches/configmap-genesis.yaml
+- path: patches/configmap-configuration.yaml
   target:
     kind: ConfigMap
     name: passive-node
-- path: patches/configmap-configuration.yaml
+- path: patches/configmap-genesis.yaml
   target:
     kind: ConfigMap
     name: passive-node
@@ -53,12 +56,16 @@ patches:
   target:
     kind: StatefulSet
     name: passive-node
+- path: patches/deployment-passive-pvc-templates.yaml
+  target:
+    kind: StatefulSet
+    name: passive-node
 # leader-node
-- path: patches/configmap-genesis.yaml
+- path: patches/configmap-configuration.yaml
   target:
     kind: ConfigMap
     name: leader-node
-- path: patches/configmap-configuration.yaml
+- path: patches/configmap-genesis.yaml
   target:
     kind: ConfigMap
     name: leader-node
@@ -73,4 +80,8 @@ patches:
 - path: patches/service-leader-node.yaml
   target:
     kind: Service
+    name: leader-node
+- path: patches/deployment-leader-pvc-templates.yaml
+  target:
+    kind: StatefulSet
     name: leader-node
