@@ -10,8 +10,8 @@ spec:
   selector:
     matchLabels:
       io.kompose.service: passive-node
-  strategy:
-    type: Recreate
+  updateStrategy:
+    type: OnDelete
   template:
     metadata:
       labels:
@@ -21,7 +21,7 @@ spec:
       - name: configure
         command: ["bash", "/configmap/initContainer-entrypoint"]
         image: rcmorano/cardano-node:guild-ops-ptn0-passive
-        imagePullPolicy: "Always"
+        imagePullPolicy: "IfNotPresent"
         env:
         - name: CNODE_PORT
           value: "6000"
@@ -61,15 +61,15 @@ spec:
         - name: CNODE_PORT
           value: "6000"
         image: rcmorano/cardano-node:guild-ops-ptn0-passive
-        imagePullPolicy: "Always"
+        imagePullPolicy: "IfNotPresent"
         ports:
         - containerPort: 6000
-        - containerPort: 13788
+        - containerPort: 12798
         resources:
           #limits:
           #  memory: 1000Mi
           requests:
-            memory: 512Mi
+            memory: 2000Mi
             cpu: 500m
         volumeMounts:
         - mountPath: /opt/cardano/cnode/files

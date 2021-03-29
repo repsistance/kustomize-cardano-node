@@ -48,7 +48,7 @@ spec:
         name: passive-node
         ports:
         - containerPort: 6000
-        - containerPort: 13788
+        - containerPort: 12798
         resources: {}
         volumeMounts:
         - mountPath: /opt/cardano/cnode/files

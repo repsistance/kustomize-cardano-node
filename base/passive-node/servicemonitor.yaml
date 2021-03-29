@@ -10,7 +10,7 @@ spec:
   - port: metrics
     path: /metrics
     interval: 10s
-    targetPort: 13788
+    targetPort: 12798
   namespaceSelector:
     matchNames:
     - cardano

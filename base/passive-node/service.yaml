@@ -49,8 +49,8 @@ spec:
   type: ClusterIP
   ports:
   - name: metrics
-    port: 13788
-    targetPort: 13788
+    port: 12798
+    targetPort: 12798
     protocol: TCP
   selector:
     io.kompose.service: passive-node

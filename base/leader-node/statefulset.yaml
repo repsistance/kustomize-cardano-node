@@ -10,24 +10,32 @@ spec:
   selector:
     matchLabels:
       io.kompose.service: leader-node
-  strategy:
-    type: Recreate
+  updateStrategy:
+    type: OnDelete
   template:
     metadata:
       labels:
         io.kompose.service: leader-node
     spec:
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+        allowPrivilegeEscalation: false
+        fsUser: 0
+        #fsGroup: 65534
       initContainers:
       - name: configure
         command: ["bash", "/configmap/initContainer-entrypoint"]
         image: rcmorano/cardano-node:guild-ops-ptn0-leader
-        imagePullPolicy: "Always"
+        imagePullPolicy: "IfNotPresent"
         env:
         - name: CNODE_PORT
           value: "6000"
         - name: CNODE_HOST_ADDR
           value: "0.0.0.0"
         - name: CNODE_USE_CONFIGMAP
+          value: "true"
+        - name: CNODE_LOCAL_TOPOLOGY_DISCOVER
           value: "true"
         - name: MY_NODE_NAME
           valueFrom:
@@ -53,21 +61,21 @@ spec:
         - mountPath: /configmap
           name: leader-node-configmap
       containers:
-      - command: ["bash", "-c", "sudo -EHu nobody bash -c 'source ~/.baids/baids && ${NETWORK}-cnode-run-as-${CNODE_ROLE}'"]
+      - command: ["bash", "-c", "ls -hal /opt/cardano/cnode/priv/pool/default; export HOME=/nonexistent; source $HOME/.baids/baids && ${NETWORK}-cnode-run-as-${CNODE_ROLE}"]
         env:
         - name: CNODE_PORT
           value: "6000"
         image: rcmorano/cardano-node:guild-ops-ptn0-leader
-        imagePullPolicy: "Always"
+        imagePullPolicy: "IfNotPresent"
         name: leader-node
         ports:
         - containerPort: 6000
-        - containerPort: 13788
+        - containerPort: 12798
         resources:
           #limits:
           #  memory: 700Mi
           requests:
-            memory: 512Mi
+            memory: 2000Mi
             cpu: 500m
         volumeMounts:
         - mountPath: /opt/cardano/cnode/files
@@ -76,8 +84,15 @@ spec:
           name: leader-node-db
         - mountPath: /configmap
           name: leader-node-configmap
-        - mountPath: /opt/cardano/cnode/priv/pool/default
+        - mountPath: /opt/cardano/cnode/priv/pool/default/op.cert
           name: pool-keys
+          subPath: op.cert
+        - mountPath: /opt/cardano/cnode/priv/pool/default/hot.skey
+          name: pool-keys
+          subPath: hot.skey
+        - mountPath: /opt/cardano/cnode/priv/pool/default/vrf.skey
+          name: pool-keys
+          subPath: vrf.skey
       restartPolicy: Always
       serviceAccountName: ""
       volumes:
@@ -87,13 +102,17 @@ spec:
       - name: pool-keys
         secret:
           secretName: pool-keys
+          defaultMode: 0400
           items:
           - key: hot.skey
             path: hot.skey
+            mode: 0400
           - key: vrf.skey
             path: vrf.skey
+            mode: 0400
           - key: op.cert
             path: op.cert
+            mode: 0400
   volumeClaimTemplates:
   - metadata:
       name: leader-node-files

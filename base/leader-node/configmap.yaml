@@ -9,7 +9,7 @@ data:
   initContainer-entrypoint: |
     rm -rf /opt/cardano/cnode/db/lost+found
 
-    FILES="configuration.yaml configuration.json byron-genesis.json genesis.json topology.json"
+    FILES="config.yaml config.json byron-genesis.json genesis.json topology.json"
 
     for file in ${FILES}
     do
@@ -26,22 +26,28 @@ data:
       done
     fi
 
-    NAMESPACE=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
-    KUBE_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+    if [ "${CNODE_LOCAL_TOPOLOGY_DISCOVER}" == "true" ]
+    then
+      NAMESPACE=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
+      KUBE_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
 
-    echo '{"Producers":[]}' > /tmp/topology.json.tmp
+      set -x
+      echo '{"Producers":[]}' > /tmp/topology.json.tmp
 
-    VALENCY=$(dig +short passive-node-headless.${NAMESPACE}.svc.cluster.local | wc -l)
+      VALENCY=$(dig +short passive-node-headless.${NAMESPACE}.svc.cluster.local | wc -l)
 
-    jq -r \
-      --arg addr passive-node-headless.${NAMESPACE}.svc.cluster.local \
-      --arg port ${CNODE_PORT} \
-      --arg valency ${VALENCY} \
-      '.Producers += [{"addr":$addr,"port":($port|tonumber),"valency":($valency|tonumber)}]' \
-      /tmp/topology.json.tmp > /tmp/topology.json
+      jq -r \
+        --arg addr passive-node-headless.${NAMESPACE}.svc.cluster.local \
+        --arg port ${CNODE_PORT} \
+        --arg valency ${VALENCY} \
+        '.Producers += [{"addr":$addr,"port":($port|tonumber),"valency":($valency|tonumber)}]' \
+        /tmp/topology.json.tmp > /tmp/topology.json
+        cp /tmp/topology.json /opt/cardano/cnode/files.pvc/topology.json.${CNODE_ROLE}
+    else
+        cp /opt/cardano/cnode/files.pvc/topology.json /opt/cardano/cnode/files.pvc/topology.json.${CNODE_ROLE}
+    fi
 
-    cp /tmp/topology.json /opt/cardano/cnode/files.pvc/topology.json.${CNODE_ROLE}
-
+    
     chown -R nobody: \
       /opt/cardano/cnode/files/*topology* \
       /opt/cardano/cnode/files/*genesis* \

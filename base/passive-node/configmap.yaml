@@ -9,7 +9,7 @@ data:
   initContainer-entrypoint: |
     rm -rf /opt/cardano/cnode/db/lost+found
 
-    FILES="configuration.yaml configuration.json byron-genesis.json genesis.json topology.json"
+    FILES="config.yaml config.json byron-genesis.json genesis.json topology.json"
 
     for file in ${FILES}
     do
@@ -34,6 +34,7 @@ data:
     curl -sSk -H "Authorization: Bearer $KUBE_TOKEN" https://kubernetes.default.svc/api/v1/namespaces/${NAMESPACE}/pods  | jq -r .items[].metadata.name | grep ^passive-node | \
       while read node
       do
+        set -x
         if [[ "${MY_POD_NAME}" != "${node}" ]] && [[ "${node}" != "null" ]]
         then
           PEER_ADDR="${node}.passive-node.${NAMESPACE}.svc.cluster.local"
