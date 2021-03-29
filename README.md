@@ -5,7 +5,6 @@
 - docker
 - k8s
 - kustomize
-- helm
 - kapp
 
 * testnet deploy
@@ -30,7 +29,8 @@ kapp deploy -c -a cardano-${NETWORK} -n cardano-${NETWORK} -f overlays/${OVERLAY
 ```
 kubectl create secret -n ${NAMESPACE} generic pool-keys \
   --from-file=hot.skey \
-  --from-file=vrf.skey --from-file=op.cert
+  --from-file=vrf.skey \
+  --from-file=op.cert
 ```
 
 
