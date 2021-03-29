@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    io.kompose.service: leader-node
+    prometheus: enabled
+  name: leader-node
+spec:
+  endpoints:
+  - port: metrics
+    path: /metrics
+    interval: 10s
+    targetPort: 12798
+  namespaceSelector:
+    matchNames:
+    - cardano
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: leader-node-metrics

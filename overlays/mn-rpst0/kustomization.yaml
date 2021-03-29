@@ -13,11 +13,15 @@ bases:
 - ../../base/leader-node
 resources:
 - resources/daemonset-topologyUpdater.yaml
+- resources/servicemonitor-passive-node.yaml
+- resources/servicemonitor-leader-node.yaml
 patches:
-# common
-- path: patches/deployment-affinity.yaml
+# topoupd affinity
+- path: patches/deployment-passive-node-affinity.yaml
   target:
-    kind: StatefulSet
+    kind: DaemonSet
+    name: clio1-topology-updater
+# common
 - path: patches/deployment-container-port.yaml
   target:
     kind: StatefulSet
@@ -60,6 +64,14 @@ patches:
   target:
     kind: StatefulSet
     name: passive-node
+- path: patches/deployment-passive-node-affinity.yaml
+  target:
+    kind: StatefulSet
+    name: passive-node
+- path: patches/deployment-passive-node0-affinity.yaml
+  target:
+    kind: Pod
+    name: passive-node-0
 # leader-node
 - path: patches/configmap-configuration.yaml
   target:
@@ -82,6 +94,10 @@ patches:
     kind: Service
     name: leader-node
 - path: patches/deployment-leader-pvc-templates.yaml
+  target:
+    kind: StatefulSet
+    name: leader-node
+- path: patches/deployment-leader-node-affinity.yaml
   target:
     kind: StatefulSet
     name: leader-node

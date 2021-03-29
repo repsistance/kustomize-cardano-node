@@ -7,6 +7,8 @@
       value: "0.0.0.0"
     - name: CNODE_USE_CONFIGMAP
       value: "true"
+    - name: CNODE_LOCAL_TOPOLOGY_DISCOVER
+      value: "true"
 - op: replace
   path: /spec/template/spec/initContainers/0/env
   value:
@@ -15,6 +17,8 @@
     - name: CNODE_HOST_ADDR
       value: "0.0.0.0"
     - name: CNODE_USE_CONFIGMAP
+      value: "true"
+    - name: CNODE_LOCAL_TOPOLOGY_DISCOVER
       value: "true"
     - name: MY_NODE_NAME
       valueFrom:

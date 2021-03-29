@@ -1,28 +1,23 @@
 - op: add
   path: /spec/template/spec/tolerations
   value:
-    - key: "dedicated"
+    - key: "k8s.scaleway.com/cardano-role"
       operator: "Equal"
-      value: "mainnet"
-      effect: "PreferNoSchedule"
+      value: "passive"
+      effect: "NoSchedule"
 
 - op: add
   path: /spec/template/spec/affinity
   value:
-    podAntiAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-      - labelSelector:
-          matchExpressions:
-          - key: cardano_node_type
-            operator: In
-            values:
-            - haskell
-        topologyKey: "kubernetes.io/hostname"
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
         nodeSelectorTerms:
         - matchExpressions:
-          - key: dedicated
+          - key: k8s.scaleway.com/cardano-role
+            operator: In
+            values:
+            - passive
+          - key: k8s.scaleway.com/cardano-network
             operator: In
             values:
             - mainnet
@@ -30,7 +25,11 @@
       - weight: 100
         preference:
           matchExpressions:
-            - key: dedicated
+            - key: k8s.scaleway.com/cardano-role
+              operator: In
+              values:
+              - passive
+            - key: k8s.scaleway.com/cardano-network
               operator: In
               values:
               - mainnet
