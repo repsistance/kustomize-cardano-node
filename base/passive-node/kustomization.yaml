@@ -1,10 +1,5 @@
 namespace: cardano
 resources:
-#- files-persistentvolumeclaim.yaml
-#- logs-persistentvolumeclaim.yaml
-#- priv-persistentvolumeclaim.yaml
-#- db-persistentvolumeclaim.yaml
 - configmap.yaml
 - statefulset.yaml
 - service.yaml
-- servicemonitor.yaml

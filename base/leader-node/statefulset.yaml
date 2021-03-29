@@ -118,7 +118,6 @@ spec:
       name: leader-node-files
     spec:
       accessModes: [ "ReadWriteOnce" ]
-      storageClassName: csi-s3
       resources:
         requests:
           storage: 100Mi
@@ -126,7 +125,6 @@ spec:
 #      name: leader-node-priv
 #    spec:
 #      accessModes: [ "ReadWriteOnce" ]
-#      storageClassName: csi-s3
 #      resources:
 #        requests:
 #          storage: 100Mi

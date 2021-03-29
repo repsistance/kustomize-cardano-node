@@ -1,0 +1,24 @@
+- op: replace
+  path: /spec/volumeClaimTemplates
+  value:
+  - metadata:
+      name: passive-node-files
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 100Mi
+  - metadata:
+      name: passive-node-priv
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 100Mi
+  - metadata:
+      name: passive-node-db
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 8Gi
