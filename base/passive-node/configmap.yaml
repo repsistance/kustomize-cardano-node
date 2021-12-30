@@ -9,7 +9,7 @@ data:
   initContainer-entrypoint: |
     rm -rf /opt/cardano/cnode/db/lost+found
 
-    FILES="config.yaml config.json byron-genesis.json genesis.json topology.json"
+    FILES="config.yaml config.json alonzo-genesis.json byron-genesis.json shelley-genesis.json topology.json"
 
     for file in ${FILES}
     do

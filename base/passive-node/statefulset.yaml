@@ -80,16 +80,16 @@ spec:
           name: passive-node-db
         - mountPath: /configmap
           name: passive-node-configmap
-      startupProbe:
-        exec:
-          command: ["bash","-c","source /nonexistent/.baids/functions.d/99-misc; cardano-node-startup-probe"]
-        failureThreshold: 30
-        periodSeconds: 20
-      readinessProbe:
-        exec:
-          command: ["bash","-c","source /nonexistent/.baids/functions.d/99-misc; cardano-node-startup-probe"]
-        failureThreshold: 30
-        periodSeconds: 10
+      #startupProbe:
+      #  exec:
+      #    command: ["bash","-c","source /nonexistent/.baids/functions.d/99-misc; cardano-node-startup-probe"]
+      #  failureThreshold: 30
+      #  periodSeconds: 20
+      #readinessProbe:
+      #  exec:
+      #    command: ["bash","-c","source /nonexistent/.baids/functions.d/99-misc; cardano-node-startup-probe"]
+      #  failureThreshold: 30
+      #  periodSeconds: 10
       restartPolicy: Always
       serviceAccountName: ""
       volumes:
