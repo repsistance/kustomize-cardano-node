@@ -23,6 +23,12 @@ spec:
         image: rcmorano/cardano-node:guild-ops-ptn0-passive
         imagePullPolicy: "IfNotPresent"
         env:
+        - name: RESTORE_SNAPSHOT
+          value: "true"
+        - name: NETWORK
+          value: mainnet
+        - name: CNODE_DB_PATH
+          value: /opt/cardano/cnode
         - name: CNODE_PORT
           value: "6000"
         - name: CNODE_HOST_ADDR

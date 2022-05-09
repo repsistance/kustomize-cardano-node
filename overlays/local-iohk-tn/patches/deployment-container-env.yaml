@@ -12,6 +12,12 @@
 - op: replace
   path: /spec/template/spec/initContainers/0/env
   value:
+    - name: RESTORE_SNAPSHOT
+      value: "true"
+    - name: NETWORK
+      value: testnet
+    - name: CNODE_DB_PATH
+      value: /opt/cardano/cnode
     - name: CNODE_PORT
       value: "31337"
     - name: CNODE_HOST_ADDR
