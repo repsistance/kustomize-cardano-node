@@ -1,0 +1,44 @@
+- op: replace
+  path: /spec/template/spec/containers/0/env
+  value:
+    - name: CNODE_PORT
+      value: "30042"
+    - name: CNODE_HOST_ADDR
+      value: "0.0.0.0"
+    - name: CNODE_USE_CONFIGMAP
+      value: "true"
+    - name: CNODE_LOCAL_TOPOLOGY_DISCOVER
+      value: "true"
+- op: replace
+  path: /spec/template/spec/initContainers/0/env
+  value:
+    - name: RESTORE_SNAPSHOT
+      value: "true"
+    - name: NETWORK
+      value: mainnet
+    - name: CNODE_DB_PATH
+      value: /opt/cardano/cnode
+    - name: CNODE_PORT
+      value: "30042"
+    - name: CNODE_HOST_ADDR
+      value: "0.0.0.0"
+    - name: CNODE_USE_CONFIGMAP
+      value: "true"
+    - name: CNODE_LOCAL_TOPOLOGY_DISCOVER
+      value: "true"
+    - name: MY_NODE_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.nodeName
+    - name: MY_POD_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.name
+    - name: MY_POD_NAMESPACE
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.namespace
+    - name: MY_POD_IP
+      valueFrom:
+        fieldRef:
+          fieldPath: status.podIP

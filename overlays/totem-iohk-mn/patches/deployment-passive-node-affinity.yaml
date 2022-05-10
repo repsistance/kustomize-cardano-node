@@ -1,0 +1,35 @@
+- op: add
+  path: /spec/template/spec/tolerations
+  value:
+    - key: "k8s.scaleway.com/cardano-role"
+      operator: "Equal"
+      value: "passive"
+      effect: "NoSchedule"
+
+- op: add
+  path: /spec/template/spec/affinity
+  value:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: k8s.scaleway.com/cardano-role
+            operator: In
+            values:
+            - passive
+          - key: k8s.scaleway.com/cardano-network
+            operator: In
+            values:
+            - mainnet
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        preference:
+          matchExpressions:
+            - key: k8s.scaleway.com/cardano-role
+              operator: In
+              values:
+              - passive
+            - key: k8s.scaleway.com/cardano-network
+              operator: In
+              values:
+              - mainnet
