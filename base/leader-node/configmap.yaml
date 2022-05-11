@@ -9,6 +9,12 @@ data:
   initContainer-entrypoint: |
     rm -rf /opt/cardano/cnode/db/lost+found
 
+    if [[ ! -e /data/db/lock ]] && [[ "${RESTORE_SNAPSHOT}" == "true" ]]
+    then
+      sudo apt update -qq && sudo apt install -y liblz4-tool
+      curl -o - https://download.csnapshots.io/${NETWORK}/$(curl -s https://data.csnapshots.io/${NETWORK}-db-snapshot.json | jq -r .[].file_name ) | lz4 -c -d - | tar -x -C ${CNODE_DB_PATH}
+    fi
+
     FILES="config.yaml config.json alonzo-genesis.json byron-genesis.json shelley-genesis.json topology.json"
 
     for file in ${FILES}
