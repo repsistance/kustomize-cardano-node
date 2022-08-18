@@ -1,6 +1,8 @@
 resources:
+- rbac.yaml
 - configmap.yaml
 - pvc.yaml
 - deployment.yaml
 - service.yaml
 - ingress.yaml
+- cronjob-secret-mgmt.yaml

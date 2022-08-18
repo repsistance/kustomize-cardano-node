@@ -1,40 +1,59 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: ogmios-configmap
+  name: gc-totem-ms-configmap
 data:
-  initContainer-entrypoint: |
-    rm -rf /config/lost+found
+  update-pool-keys: |
+    export KUBE_API_URL="https://kubernetes.default.svc/api/v1/namespaces"
+    KUBE_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+    NAMESPACE=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
+    LAST_CREATED_STAKEPOOL_NAME=$(ls -rt1 /priv/pool/ | tail -n1)
+    ALREADY_RUNNING=$(curl -m 30 -sSk -H "Authorization: Bearer $KUBE_TOKEN" "${KUBE_API_URL}/${NAMESPACE}/pods" | jq -r '.items[] | select(.status.phase=="Running") | .metadata.name' | grep ^gc-totem-ms-secret-mgmt | grep -v ${MY_POD_NAME})
 
-    #cp /opt/cardano/cnode/files/config.json /config/cardano-node-config.json
-    #cp /opt/cardano/cnode/files/genesis.json /config/genesis-shelley.json
-    #cp /opt/cardano/cnode/files/byron-genesis.json /config/genesis-byron.json
+    if [ -z "${ALREADY_RUNNING}" ]
+    then
+      kubectl get secret -n ${NAMESPACE} pool-keys &> /dev/null
+      if [ $? -eq 1 ]
+      then 
+        cd /tmp
+        cp -a /priv/pool/${LAST_CREATED_STAKEPOOL_NAME}/${LAST_CREATED_STAKEPOOL_NAME}.node.skey hot.skey
+        cp -a /priv/pool/${LAST_CREATED_STAKEPOOL_NAME}/${LAST_CREATED_STAKEPOOL_NAME}.vrf.skey vrf.skey
+        cp -a /priv/pool/${LAST_CREATED_STAKEPOOL_NAME}/${LAST_CREATED_STAKEPOOL_NAME}.node.cert op.cert
+        kubectl create secret -n ${NAMESPACE} generic pool-keys \
+          --from-file=hot.skey \
+          --from-file=vrf.skey \
+          --from-file=op.cert
+        kubectl delete pod -n ${NAMESPACE} leader-node-0
+      else
+        kubectl get secret -n ${NAMESPACE} pool-keys -o jsonpath='{.data.hot\.skey}' | base64 -d > /tmp/hot.skey.current
+        kubectl get secret -n ${NAMESPACE} pool-keys -o jsonpath='{.data.vrf\.skey}' | base64 -d > /tmp/vrf.skey.current
+        kubectl get secret -n ${NAMESPACE} pool-keys -o jsonpath='{.data.op\.cert}' | base64 -d > /tmp/op.cert.current
+        if
+          [[ ! -z $(diff /priv/pool/${LAST_CREATED_STAKEPOOL_NAME}/${LAST_CREATED_STAKEPOOL_NAME}.node.skey /tmp/hot.skey.current) ]] || \
+          [[ ! -z $(diff /priv/pool/${LAST_CREATED_STAKEPOOL_NAME}/${LAST_CREATED_STAKEPOOL_NAME}.vrf.skey /tmp/vrf.skey.current) ]] || \
+          [[ ! -z $(diff /priv/pool/${LAST_CREATED_STAKEPOOL_NAME}/${LAST_CREATED_STAKEPOOL_NAME}.node.cert /tmp/op.cert.current) ]]
+        then
+          kubectl delete secret -n ${NAMESPACE} pool-keys
+          cd /tmp
+          cp -a /priv/pool/${LAST_CREATED_STAKEPOOL_NAME}/${LAST_CREATED_STAKEPOOL_NAME}.node.skey hot.skey
+          cp -a /priv/pool/${LAST_CREATED_STAKEPOOL_NAME}/${LAST_CREATED_STAKEPOOL_NAME}.vrf.skey vrf.skey
+          cp -a /priv/pool/${LAST_CREATED_STAKEPOOL_NAME}/${LAST_CREATED_STAKEPOOL_NAME}.node.cert op.cert
+          kubectl create secret -n ${NAMESPACE} generic pool-keys \
+            --from-file=hot.skey \
+            --from-file=vrf.skey \
+            --from-file=op.cert
+          kubectl delete pod -n ${NAMESPACE} leader-node-0
+        fi
+      fi
+    else
+      echo "[!] Previous cronjob job already running, skipping..."
+    fi
 
-    if [ ! -e /config/network/cardano-node/config.json ]
-    then
-      mkdir -p /config/network/cardano-node
-      case "${OGMIOS_NETWORK}" in
-        "mainnet")
-          curl -sLo /config/network/cardano-node/config.json https://raw.githubusercontent.com/input-output-hk/cardano-configurations/60dd866eaf6eea3c9d27bfaa8bee9908722876ac/network/mainnet/cardano-node/config.json
-        ;;
-        "testnet")
-          curl -sLo /config/network/cardano-node/config.json https://raw.githubusercontent.com/input-output-hk/cardano-configurations/60dd866eaf6eea3c9d27bfaa8bee9908722876ac/network/testnet/cardano-node/config.json
-        ;;
-      esac
-    fi
-    if [ ! -e /config/network/genesis/genesis.json ]
-    then
-      mkdir -p /config/network/genesis
-      case "${OGMIOS_NETWORK}" in
-        "mainnet")
-          curl -sLo /config/network/genesis/byron.json https://raw.githubusercontent.com/input-output-hk/cardano-configurations/60dd866eaf6eea3c9d27bfaa8bee9908722876ac/network/mainnet/genesis/byron.json
-          curl -sLo /config/network/genesis/shelley.json https://raw.githubusercontent.com/input-output-hk/cardano-configurations/60dd866eaf6eea3c9d27bfaa8bee9908722876ac/network/mainnet/genesis/shelley.json
-          curl -sLo /config/network/genesis/alonzo.json https://raw.githubusercontent.com/input-output-hk/cardano-configurations/60dd866eaf6eea3c9d27bfaa8bee9908722876ac/network/mainnet/genesis/alonzo.json
-        ;;
-        "testnet")
-          curl -sLo /config/network/genesis/byron.json https://raw.githubusercontent.com/input-output-hk/cardano-configurations/60dd866eaf6eea3c9d27bfaa8bee9908722876ac/network/testnet/genesis/byron.json
-          curl -sLo /config/network/genesis/shelley.json https://raw.githubusercontent.com/input-output-hk/cardano-configurations/60dd866eaf6eea3c9d27bfaa8bee9908722876ac/network/testnet/genesis/shelley.json
-          curl -sLo /config/network/genesis/alonzo.json https://raw.githubusercontent.com/input-output-hk/cardano-configurations/60dd866eaf6eea3c9d27bfaa8bee9908722876ac/network/testnet/genesis/alonzo.json
-        ;;
-      esac
-    fi
+    echo "[!] Cleaning up possibly stuck 'Terminating' pods..."
+    kubectl get pods -n ${NAMESPACE} | grep ^gc-totem-ms-secret-mgmt.*Terminating | awk '{print $1}' | while read pod
+    do
+      kubectl patch pod -n ${NAMESPACE} \
+        --type json \
+        --patch '[ { "op": "remove", "path": "/metadata/finalizers" } ]' \
+        $pod
+    done

@@ -33,7 +33,7 @@ spec:
         - name: TESTNET_MAGIC
           value: "testnet-magic 109791106"
         - name: CARDANO_NODE_SOCKET_PATH
-          value: "/node-ipc/node0.socket"
+          value: "/node-ipc/node.socket"
         image: gimbalabs/gc-totem-microservice:latest
         imagePullPolicy: Always
         ports:

@@ -13,3 +13,23 @@ spec:
     io.kompose.service: gc-totem-ms
 status:
   loadBalancer: {}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    io.kompose.service: gc-totem-ms
+  name: gc-totem-ms-api
+spec:
+  ports:
+  - name: "6001"
+    port: 6001
+    targetPort: 6001
+  selector:
+    io.kompose.service: gc-totem-ms
+status:
+  loadBalancer: {}
+
+---
