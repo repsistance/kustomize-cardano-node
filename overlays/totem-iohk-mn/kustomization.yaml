@@ -11,6 +11,7 @@ bases:
 - ../../base/common
 - ../../base/passive-node
 - ../../base/leader-node
+- resources/gc-totem-ms
 resources:
 - resources/daemonset-topologyUpdater.yaml
 patches:

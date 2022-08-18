@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: gc-totem-ms
+  name: gc-totem-ms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: gc-totem-ms
+  template:
+    metadata:
+      labels:
+        io.kompose.service: gc-totem-ms
+    spec:
+      initContainers:
+      - name: init-www-front
+        image: gimbalabs/gc-totem-microservice:latest
+        command: ["sh", "-c", "cp -a /src/src/front/*html /var/www/html"]
+        volumeMounts:
+        - mountPath: /var/www/html
+          name: www-front
+      containers:
+      - name: gc-totem-ms-api
+        env:
+        - name: NODE_ENV
+          value: "development"
+        - name: SERVER_PORT
+          value: "6001"
+        - name: SHELLEY_GENESIS
+          value: "/config/testnet-shelley-genesis.json"
+        - name: TESTNET_MAGIC
+          value: "testnet-magic 109791106"
+        - name: CARDANO_NODE_SOCKET_PATH
+          value: "/node-ipc/node0.socket"
+        image: gimbalabs/gc-totem-microservice:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 6001
+        resources: {}
+        volumeMounts:
+        - mountPath: /node-ipc
+          name: node-ipc
+        - name: gc-totem-ms-priv
+          mountPath: /src/priv
+      - name: socat-socket-server
+        image: alpine/socat
+        env:
+        - name: CARDANO_NODE_SOCKET_TCP_HOST
+          value: "cardano-node-headless"
+        - name: CARDANO_NODE_SOCKET_TCP_PORT
+          value: "30000"
+        command: ["sh", "-c", "rm -f /ipc/node.socket; socat UNIX-LISTEN:/ipc/node.socket,fork TCP:${CARDANO_NODE_SOCKET_TCP_HOST}:${CARDANO_NODE_SOCKET_TCP_PORT},ignoreeof"]
+        volumeMounts:
+        - mountPath: /ipc
+          name: node-ipc
+      - name: gc-totem-ms-www
+        image: nginx
+        volumeMounts:
+        - name: www-front
+          mountPath: /usr/share/nginx/html
+        ports:
+        - containerPort: 80
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - name: node-ipc
+        emptyDir: {}
+      - name: www-front
+        emptyDir: {}
+      - name: gc-totem-ms-priv
+        persistentVolumeClaim:
+          claimName: gc-totem-ms-priv
+      - name: gc-totem-ms-configmap
+        configMap:
+          name: gc-totem-ms-configmap

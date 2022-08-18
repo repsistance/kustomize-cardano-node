@@ -1,0 +1,23 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gc-totem-ms-local
+spec:
+  rules:
+    - host: gc-totem-ms.local
+      http:
+        paths:
+          - backend:
+              service:
+                name: gc-totem-ms-www
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
+  # This section is only required if TLS is to be enabled for the Ingress
+  tls:
+  - hosts:
+    - gc-totem-ms.local
+    #secretName: local-tls
+
